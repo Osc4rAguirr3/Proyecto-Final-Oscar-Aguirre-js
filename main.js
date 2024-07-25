@@ -1,71 +1,97 @@
-let productos = [
-    {name: "Iphone 13", id: 1},
-    {name: "Iphone 14", id: 2},
-    {name: "Iphone 15", id: 3},
-    {name: "Fundas", id: 4},
-    {name: "Lighting", id: 5},
-    {name: "Cargador", id: 6},
-    {name: "AirPods Pro 2", id: 7},
-    {name: "AirPods Pro", id: 8},
-    {name: "AirPods 3", id: 9}
-];
+const products = [
+    {
+        id: 1,
+        name: 'Iphone 11',
+        price: '300',
+        description: 'Iphone-11',
+        image: 'assets/iphone11.png',
+    },
 
-let precios = {
-    1: "$500",
-    2: "$700",
-    3: "$900",
-    4: "$5",
-    5: "$10",
-    6: "$15",
-    7: "$330",
-    8: "$50",
-    9: "$170",
-};
+    {
+        id: 2,
+        name: 'Iphone 12',
+        price: '400',
+        description: 'Iphone-12',
+        image: 'assets/iphone12.png',
+    },
 
-function pedirNombre(){
-    let nombre = prompt ("Por favor, ingresa tu nombre:");
-    alert("Hola " + nombre + ", bienvenido a Irenoved");
+    {
+        id: 3,
+        name: 'Iphone 13',
+        price: '500',
+        description: 'Iphone-13',
+        image: 'assets/iphone13.png',
+    },
+
+    {
+        id: 4,
+        name: 'Iphone 14',
+        price: '650',
+        description: 'Iphone-14',
+        image: 'assets/iphone14.png',
+    },
+]
+
+const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+const createProducts = () => {
+    products.forEach(product => {
+        const card = document.createElement('div');
+        card.innerHTML = `
+            <img src="${product.image}" alt="${product.description}">
+            <h3>$${product.price}</h3>
+            <h4>${product.name}</h4>
+            <button id="${product.id}" class='button'>Agregar al carrito</button>`;
+
+        root.appendChild(card);
+    });
+    loadEvents();
 }
 
-function pedirEmail(){
-    const email = prompt("Por favor, ingrese su correo electrónico:", "");
-if (email) {
-    confirm(`El correo electrónico ingresado es: ${email}"`);
-} else {
-    alert("No se ingresó ningún correo electrónico.");
-}
-}
-
-function adicionarIVA(precio) {
-    return precio * 1.16;
-}
-
-function seguirEnvioCorreo(){
-    alert ("¡Gracias por tu compra! Puedes seguir tu pedido a través del enlace que te enviamos por correo electrónico.")
-}
-
-function seleccionarProductos() {
-    let productoSeleccionado;
-    let continuar = true;
-
-    while (continuar) {
-    let elegirProductos = prompt(
-        "Elija el producto que quiere comprar\n" +
-        productos.map((producto, index) => `${index + 1}: ${producto.name}`).join("\n")); productoSeleccionado = Number(elegirProductos);
-    if (productoSeleccionado > 0 && productoSeleccionado <= productos.length) {
-        let productoElegido = productos.find((producto) => producto.id === productoSeleccionado);
-        let precio = precios[productoElegido.id];
-        let precioConIVA = adicionarIVA(precio.replace("$", ""));
-        confirm(`Has elegido ${productoElegido.name}, con un valor de ${precioConIVA} con IVA incluido ¿desea completar la compra?`);
-        seguirEnvioCorreo();
-        continuar = false;
-    } else {
-        alert("Opción no válida. Por favor, elige entre 1 y " + productos.length);
+const loadEvents = () => {
+    const buttons = document.querySelectorAll('.button');
+    for (const button of buttons) {
+        button.addEventListener('click', () => {
+            const selectedProduct = products.find(product => product.id === Number(button.id))
+            if (selectedProduct) {
+                alert(`El Producto ${selectedProduct.name} se agrego al carrito`)
+                cart.push(selectedProduct)
+                localStorage.setItem('cart', JSON.stringify(cart))
+                updateCartList()
+            }
+        });
     }
-    }
+
+    const clearCartButton = document.getElementById('clear-cart')
+    clearCartButton.addEventListener('click', () => {
+        cart.length = 0
+        localStorage.setItem('cart', JSON.stringify(cart))
+        updateCartList()
+    })
 }
 
-pedirNombre();
-pedirEmail();
-seleccionarProductos();
-completarCompra();
+const updateCartList = () => {
+    const cartList = document.getElementById('cart-list')
+    cartList.innerHTML = ''
+    cart.forEach(product => {
+        const cartItem = document.createElement('li')
+        cartItem.innerHTML = `
+            <img src="${product.image}" alt="${product.description}">
+            <h3>$${product.price}</h3>
+            <h4>${product.name}</h4>
+            <button class='remove-button'>Eliminar</button>
+        `
+        cartList.appendChild(cartItem)
+
+        const removeButton = cartItem.querySelector('.remove-button')
+        removeButton.addEventListener('click', () => {
+            const index = cart.indexOf(product)
+            cart.splice(index, 1)
+            localStorage.setItem('cart', JSON.stringify(cart))
+            updateCartList()
+        })
+    })
+}
+
+createProducts()
+updateCartList()
